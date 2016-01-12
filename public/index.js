@@ -174,7 +174,7 @@ function numberDays(locationNumber) {
 }
 
 function priceLocation(locationNumber) {
-	var priceLoc;
+	var priceLoc = 0;
 	if(rentals[locationNumber].carId == 'p306'){
 		return priceLoc = cars[0].pricePerDay * numberDays(locationNumber) + cars[0].pricePerKm * rentals[locationNumber].distance;
 	}
@@ -209,11 +209,25 @@ function replacePrice() {
 	}
 }
 
+function calculateCommission(locationNumber) {
+	var commission = rentals[locationNumber].price * 0.3;
+	rentals[locationNumber].commission.insurance = commission/2;
+	rentals[locationNumber].commission.assistance = numberDays(locationNumber)*1;
+	rentals[locationNumber].commission.drivy = commission - (rentals[locationNumber].commission.insurance + rentals[locationNumber].commission.assistance);
+}
+
+function replaceCommission() {
+	for(var locationNumber = 0; locationNumber < rentals.length; locationNumber++) {
+		calculateCommission(locationNumber);
+	}
+}
+
 
 console.log(priceLocation(0));
 console.log(priceLocation(1));
 console.log(priceLocation(2));
 replacePrice();
+replaceCommission();
 
 console.log(cars);
 console.log(rentals);
