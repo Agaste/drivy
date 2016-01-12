@@ -165,7 +165,37 @@ var rentalModifications = [{
   'pickupDate': '2015-12-05'
 }];
 
+function numberDays(i) {
+	var pickupTime = new Date(rentals[i].pickupDate);
+	var returnTime = new Date(rentals[i].returnDate);
+	var days = (returnTime - pickupTime)/(1000*60*60*24);
+	
+	return days+1;
+}
+
+function priceLocation(locationNumber) {
+	var priceLoc;
+	if(rentals[locationNumber].carId == 'p306'){
+		return priceLoc = cars[0].pricePerDay * numberDays(locationNumber) + cars[0].pricePerKm * rentals[locationNumber].distance;
+	}
+	
+	else if(rentals[locationNumber].carId == 'rr-sport') {
+		return priceLoc = cars[1].pricePerDay * numberDays(locationNumber) + cars[1].pricePerKm * rentals[locationNumber].distance;
+	}
+	
+	else if(rentals[locationNumber].carId == 'p-boxster') {
+		return priceLoc = cars[2].pricePerDay * numberDays(locationNumber) + cars[2].pricePerKm * rentals[locationNumber].distance;
+	}
+}
+
+function replacePrice() {
+	for(var locationNumber = 0; locationNumber < rentals.length; locationNumber++) {
+		rentals[locationNumber].price = priceLocation(locationNumber);
+	}
+}
+
 console.log(cars);
 console.log(rentals);
 console.log(actors);
 console.log(rentalModifications);
+replacePrice();
