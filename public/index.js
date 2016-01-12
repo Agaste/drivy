@@ -165,9 +165,9 @@ var rentalModifications = [{
   'pickupDate': '2015-12-05'
 }];
 
-function numberDays(i) {
-	var pickupTime = new Date(rentals[i].pickupDate);
-	var returnTime = new Date(rentals[i].returnDate);
+function numberDays(locationNumber) {
+	var pickupTime = new Date(rentals[locationNumber].pickupDate);
+	var returnTime = new Date(rentals[locationNumber].returnDate);
 	var days = (returnTime - pickupTime)/(1000*60*60*24);
 	
 	return days+1;
@@ -188,14 +188,34 @@ function priceLocation(locationNumber) {
 	}
 }
 
+function priceReductionPerDay(locationNumber) {
+	if(numberDays(locationNumber) > 1) {
+		cars[locationNumber].pricePerDay = 0.9 * cars[locationNumber].pricePerDay;
+	}
+	
+	else if(numberDays(locationNumber) > 4) {
+		cars[locationNumber].pricePerDay = 0.7 * cars[locationNumber].pricePerDay;
+	}
+	
+	else if(numberDays(locationNumber) > 10) {
+		cars[locationNumber].pricePerDay = 0.5 * cars[locationNumber].pricePerDay;
+	}
+}
+
 function replacePrice() {
 	for(var locationNumber = 0; locationNumber < rentals.length; locationNumber++) {
+		priceReductionPerDay(locationNumber);
 		rentals[locationNumber].price = priceLocation(locationNumber);
 	}
 }
+
+
+console.log(priceLocation(0));
+console.log(priceLocation(1));
+console.log(priceLocation(2));
+replacePrice();
 
 console.log(cars);
 console.log(rentals);
 console.log(actors);
 console.log(rentalModifications);
-replacePrice();
