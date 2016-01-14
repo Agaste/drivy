@@ -214,6 +214,13 @@ function replaceCommission() {
 	}
 }
 
+function priceWithReductionPerDay(locationNumber) {
+	var priceTemp = 0;
+	priceReductionPerDay(locationNumber);
+	priceLocation(locationNumber);
+	return priceTemp = rentals[locationNumber].price;
+}
+
 function addOptionAccident(locationNumber) {
 	if(rentals[locationNumber].options.deductibleReduction == true) {
 		rentals[locationNumber].price = rentals[locationNumber].price + 4 * numberDays(locationNumber);
@@ -231,8 +238,23 @@ function replacePrice() {
 	}
 }
 
+function timeToPay(locationNumber) {
+	actors[locationNumber].payment[0].amount = rentals[locationNumber].price;
+	actors[locationNumber].payment[1].amount = 0.7 * priceWithReductionPerDay(locationNumber);
+	actors[locationNumber].payment[2].amount = rentals[locationNumber].commission.insurance;
+	actors[locationNumber].payment[3].amount = rentals[locationNumber].commission.assistance;
+	actors[locationNumber].payment[4].amount = rentals[locationNumber].commission.drivy + (rentals[locationNumber].price - priceWithReductionPerDay(locationNumber));
+}
+
+function fulfillActors() {
+	for(var locationNumber=0;locationNumber < rentals.length;locationNumber++) {
+		timeToPay(locationNumber);
+	}
+}
+
 replacePrice();
 replaceCommission();
+fulfillActors();
 
 console.log(cars);
 console.log(rentals);
