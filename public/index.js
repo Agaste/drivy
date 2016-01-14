@@ -238,29 +238,23 @@ function addOptionAccident(locationNumber) {
 	}
 }
 
-function replacePrice() {
-	for(var locationNumber = 0; locationNumber < rentals.length; locationNumber++) {
-		priceReductionPerDay(locationNumber);
-		priceLocation(locationNumber);
-		addOptionAccident(locationNumber);
-	}
-}
+
 
 function timeToPay(locationNumber) {
 	if(rentals[locationNumber].options.deductibleReduction == false){
-		actors[locationNumber].payment[0].amount = rentals[locationNumber].price;
-		actors[locationNumber].payment[1].amount = rentals[locationNumber].price * 0.7;
-		actors[locationNumber].payment[2].amount = rentals[locationNumber].commission.insurance;
-		actors[locationNumber].payment[3].amount = rentals[locationNumber].commission.assistance;
-		actors[locationNumber].payment[4].amount = rentals[locationNumber].commission.drivy;
+		actors[locationNumber].payment[0].amount = Math.round(rentals[locationNumber].price);
+		actors[locationNumber].payment[1].amount = Math.round(rentals[locationNumber].price * 0.7);
+		actors[locationNumber].payment[2].amount = Math.round(rentals[locationNumber].commission.insurance);
+		actors[locationNumber].payment[3].amount = Math.round(rentals[locationNumber].commission.assistance);
+		actors[locationNumber].payment[4].amount = Math.round(rentals[locationNumber].commission.drivy);
 	}
 	
 	else {
-		actors[locationNumber].payment[0].amount = rentals[locationNumber].price;
+		actors[locationNumber].payment[0].amount = Math.round(rentals[locationNumber].price);
 		actors[locationNumber].payment[1].amount = Math.round((rentals[locationNumber].price - numberDays(locationNumber) * 4) * 0.7);
-		actors[locationNumber].payment[2].amount = rentals[locationNumber].commission.insurance;
-		actors[locationNumber].payment[3].amount = rentals[locationNumber].commission.assistance;
-		actors[locationNumber].payment[4].amount = rentals[locationNumber].commission.drivy + numberDays(locationNumber) * 4;	
+		actors[locationNumber].payment[2].amount = Math.round(rentals[locationNumber].commission.insurance);
+		actors[locationNumber].payment[3].amount = Math.round(rentals[locationNumber].commission.assistance);
+		actors[locationNumber].payment[4].amount = Math.round(rentals[locationNumber].commission.drivy + numberDays(locationNumber) * 4);	
 	}
 }
 
@@ -270,19 +264,38 @@ function fulfillActors() {
 	}
 }
 
+function replacePrice() {
+	for(var locationNumber = 0; locationNumber < rentals.length; locationNumber++) {
+		priceReductionPerDay(locationNumber);
+		priceLocation(locationNumber);
+		addOptionAccident(locationNumber);
+	}
+}
+
 function calculateDelta() {
 	for(var rentalNumber=0; rentalNumber < rentals.length ; rentalNumber++) {
 		for(var modifNumber=0 ; modifNumber < rentalModifications.length ; modifNumber++) {
 		
 			if(rentals[rentalNumber].id == rentalModifications[modifNumber].rentalId) {
+			
 				var beforeModifDriver = actors[rentalNumber].payment[0].amount;
 				var beforeModifOwner = actors[rentalNumber].payment[1].amount;
 				var beforeModifInsurance = actors[rentalNumber].payment[2].amount;
 				var beforeModifAssistance = actors[rentalNumber].payment[3].amount;
-				var beforeModifDrivy = actors[rentalNumber].payment[4].amount;
-			
-				rentals[rentalNumber].returnDate = rentalModifications[modifNumber].returnDate;
-				rentals[rentalNumber].distance = rentalModifications[modifNumber].distance;
+				var beforeModifDrivy = actors[rentalNumber].payment[4].amount;	
+				
+				if(typeof rentalModifications[modifNumber].returnDate != "undefined") {
+					rentals[rentalNumber].returnDate = rentalModifications[modifNumber].returnDate;
+				}
+				
+				if(typeof rentalModifications[modifNumber].pickupDate != "undefined") {
+					rentals[rentalNumber].pickupDate = rentalModifications[modifNumber].pickupDate;
+				}
+				
+				if (typeof rentalModifications[modifNumber].distance != "undefined") {
+					rentals[rentalNumber].distance = rentalModifications[modifNumber].distance;
+				}
+				
 				
 				replacePrice();
 				replaceCommission();
@@ -309,7 +322,8 @@ replacePrice();
 replaceCommission();
 fulfillActors();
 
-//calculateDelta();
+console.log(cars);
+calculateDelta();
 
 
 console.log(cars);
