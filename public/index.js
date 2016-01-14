@@ -174,17 +174,16 @@ function numberDays(locationNumber) {
 }
 
 function priceLocation(locationNumber) {
-	var priceLoc = 0;
 	if(rentals[locationNumber].carId == 'p306'){
-		return priceLoc = cars[0].pricePerDay * numberDays(locationNumber) + cars[0].pricePerKm * rentals[locationNumber].distance;
+		rentals[locationNumber].price = cars[0].pricePerDay * numberDays(locationNumber) + cars[0].pricePerKm * rentals[locationNumber].distance;
 	}
 	
 	else if(rentals[locationNumber].carId == 'rr-sport') {
-		return priceLoc = cars[1].pricePerDay * numberDays(locationNumber) + cars[1].pricePerKm * rentals[locationNumber].distance;
+		rentals[locationNumber].price = cars[1].pricePerDay * numberDays(locationNumber) + cars[1].pricePerKm * rentals[locationNumber].distance;
 	}
 	
 	else if(rentals[locationNumber].carId == 'p-boxster') {
-		return priceLoc = cars[2].pricePerDay * numberDays(locationNumber) + cars[2].pricePerKm * rentals[locationNumber].distance;
+		rentals[locationNumber].price = cars[2].pricePerDay * numberDays(locationNumber) + cars[2].pricePerKm * rentals[locationNumber].distance;
 	}
 }
 
@@ -202,13 +201,6 @@ function priceReductionPerDay(locationNumber) {
 	}
 }
 
-function replacePrice() {
-	for(var locationNumber = 0; locationNumber < rentals.length; locationNumber++) {
-		priceReductionPerDay(locationNumber);
-		rentals[locationNumber].price = priceLocation(locationNumber);
-	}
-}
-
 function calculateCommission(locationNumber) {
 	var commission = rentals[locationNumber].price * 0.3;
 	rentals[locationNumber].commission.insurance = commission/2;
@@ -222,10 +214,23 @@ function replaceCommission() {
 	}
 }
 
+function addOptionAccident(locationNumber) {
+	if(rentals[locationNumber].options.deductibleReduction == true) {
+		rentals[locationNumber].price = rentals[locationNumber].price + 4 * numberDays(locationNumber);
+	}
+	else {
+		rentals[locationNumber].price;
+	}
+}
 
-console.log(priceLocation(0));
-console.log(priceLocation(1));
-console.log(priceLocation(2));
+function replacePrice() {
+	for(var locationNumber = 0; locationNumber < rentals.length; locationNumber++) {
+		priceReductionPerDay(locationNumber);
+		priceLocation(locationNumber);
+		addOptionAccident(locationNumber);
+	}
+}
+
 replacePrice();
 replaceCommission();
 
