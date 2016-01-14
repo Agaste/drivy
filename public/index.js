@@ -240,10 +240,10 @@ function replacePrice() {
 
 function timeToPay(locationNumber) {
 	actors[locationNumber].payment[0].amount = rentals[locationNumber].price;
-	actors[locationNumber].payment[1].amount = 0.7 * priceWithReductionPerDay(locationNumber);
+	actors[locationNumber].payment[1].amount = 0.7 * rentals[locationNumber].price;
 	actors[locationNumber].payment[2].amount = rentals[locationNumber].commission.insurance;
 	actors[locationNumber].payment[3].amount = rentals[locationNumber].commission.assistance;
-	actors[locationNumber].payment[4].amount = rentals[locationNumber].commission.drivy + (rentals[locationNumber].price - priceWithReductionPerDay(locationNumber));
+	actors[locationNumber].payment[4].amount = rentals[locationNumber].commission.drivy + numberDays(locationNumber)*4;
 }
 
 function fulfillActors() {
