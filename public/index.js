@@ -202,10 +202,18 @@ function priceReductionPerDay(locationNumber) {
 }
 
 function calculateCommission(locationNumber) {
-	var commission = rentals[locationNumber].price * 0.3;
-	rentals[locationNumber].commission.insurance = commission/2;
-	rentals[locationNumber].commission.assistance = numberDays(locationNumber)*1;
-	rentals[locationNumber].commission.drivy = commission - (rentals[locationNumber].commission.insurance + rentals[locationNumber].commission.assistance);
+	if(rentals[locationNumber].options.deductibleReduction == false) {
+		var commission = rentals[locationNumber].price * 0.3;
+		rentals[locationNumber].commission.insurance = commission/2;
+		rentals[locationNumber].commission.assistance = numberDays(locationNumber)*1;
+		rentals[locationNumber].commission.drivy = commission - (rentals[locationNumber].commission.insurance + rentals[locationNumber].commission.assistance);
+	}
+	else {
+		var commission = (rentals[locationNumber].price - numberDays(locationNumber) * 4) * 0.3;
+		rentals[locationNumber].commission.insurance = commission/2;
+		rentals[locationNumber].commission.assistance = numberDays(locationNumber)*1;
+		rentals[locationNumber].commission.drivy = commission - (rentals[locationNumber].commission.insurance + rentals[locationNumber].commission.assistance);	
+	}
 }
 
 function replaceCommission() {
@@ -239,11 +247,21 @@ function replacePrice() {
 }
 
 function timeToPay(locationNumber) {
-	actors[locationNumber].payment[0].amount = rentals[locationNumber].price;
-	actors[locationNumber].payment[1].amount = 0.7 * rentals[locationNumber].price;
-	actors[locationNumber].payment[2].amount = rentals[locationNumber].commission.insurance;
-	actors[locationNumber].payment[3].amount = rentals[locationNumber].commission.assistance;
-	actors[locationNumber].payment[4].amount = rentals[locationNumber].commission.drivy + numberDays(locationNumber)*4;
+	if(rentals[locationNumber].options.deductibleReduction == false){
+		actors[locationNumber].payment[0].amount = rentals[locationNumber].price;
+		actors[locationNumber].payment[1].amount = rentals[locationNumber].price * 0.7;
+		actors[locationNumber].payment[2].amount = rentals[locationNumber].commission.insurance;
+		actors[locationNumber].payment[3].amount = rentals[locationNumber].commission.assistance;
+		actors[locationNumber].payment[4].amount = rentals[locationNumber].commission.drivy;
+	}
+	
+	else {
+		actors[locationNumber].payment[0].amount = rentals[locationNumber].price;
+		actors[locationNumber].payment[1].amount = Math.round((rentals[locationNumber].price - numberDays(locationNumber) * 4) * 0.7);
+		actors[locationNumber].payment[2].amount = rentals[locationNumber].commission.insurance;
+		actors[locationNumber].payment[3].amount = rentals[locationNumber].commission.assistance;
+		actors[locationNumber].payment[4].amount = rentals[locationNumber].commission.drivy + numberDays(locationNumber) * 4;	
+	}
 }
 
 function fulfillActors() {
@@ -252,9 +270,47 @@ function fulfillActors() {
 	}
 }
 
+function calculateDelta() {
+	for(var rentalNumber=0; rentalNumber < rentals.length ; rentalNumber++) {
+		for(var modifNumber=0 ; modifNumber < rentalModifications.length ; modifNumber++) {
+		
+			if(rentals[rentalNumber].id == rentalModifications[modifNumber].rentalId) {
+				var beforeModifDriver = actors[rentalNumber].payment[0].amount;
+				var beforeModifOwner = actors[rentalNumber].payment[1].amount;
+				var beforeModifInsurance = actors[rentalNumber].payment[2].amount;
+				var beforeModifAssistance = actors[rentalNumber].payment[3].amount;
+				var beforeModifDrivy = actors[rentalNumber].payment[4].amount;
+			
+				rentals[rentalNumber].returnDate = rentalModifications[modifNumber].returnDate;
+				rentals[rentalNumber].distance = rentalModifications[modifNumber].distance;
+				
+				replacePrice();
+				replaceCommission();
+				fulfillActors();
+				
+				var deltaDriver = actors[rentalNumber].payment[0].amount - beforeModifDriver;
+				var deltaOwner = actors[rentalNumber].payment[1].amount - beforeModifOwner;
+				var deltaInsurance = actors[rentalNumber].payment[2].amount - beforeModifInsurance;
+				var deltaAssistance = actors[rentalNumber].payment[3].amount - beforeModifAssistance;
+				var deltaDrivy = actors[rentalNumber].payment[4].amount - beforeModifDrivy;
+				
+				actors[rentalNumber].payment[0].amount = actors[rentalNumber].payment[0].amount + deltaDriver;
+				actors[rentalNumber].payment[1].amount = actors[rentalNumber].payment[1].amount + deltaOwner;
+				actors[rentalNumber].payment[2].amount = actors[rentalNumber].payment[2].amount + deltaInsurance;
+				actors[rentalNumber].payment[3].amount = actors[rentalNumber].payment[3].amount + deltaAssistance;
+				actors[rentalNumber].payment[4].amount = actors[rentalNumber].payment[4].amount + deltaDrivy;
+			}
+			
+		}
+	}
+}
+
 replacePrice();
 replaceCommission();
 fulfillActors();
+
+//calculateDelta();
+
 
 console.log(cars);
 console.log(rentals);
